@@ -11,11 +11,13 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start', // Required to support RN42+ due a bug with wrap
     flexWrap: 'wrap',
     flexDirection: 'column',
+    height: "100%"
   },
   vertical: {
     alignItems: 'flex-start', // Required to support RN42+ due a bug with wrap
     flexWrap: 'wrap',
     flexDirection: 'row',
+    width: "100%"
   },
   stretch: {
     flex: 1,
