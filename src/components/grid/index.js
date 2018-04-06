@@ -90,11 +90,16 @@ class Grid extends Component {
   /**
    * Helper function that calculates all state (context) values.
    */
-  determineSize = (breakpoints, horizontal, width, height) => determineSizeClass(
-    SIZE_NAMES,
-    breakpoints,
-    (horizontal ? height : width),
-  );
+  determineSize = (breakpoints, horizontal, width, height) => {
+    if (width == 0 || height == 0) {
+        return undefined;
+    }
+    return determineSizeClass(
+        SIZE_NAMES,
+        breakpoints,
+        (horizontal ? height : width),
+    );
+}
 
   /**
    * Handler for window size changes when grid is relative to it.
@@ -127,7 +132,7 @@ class Grid extends Component {
   render() {
     // Only enable onLayout handler when Grid is relative to its own size.
     const onLayoutHandler = (this.props.relativeTo === 'self' ? this.onLayout : null);
-
+ 
     const view = (
       <View
         style={[
