@@ -15,7 +15,6 @@ import { BreakpointsProp } from './props';
 import SizeSubscriber from './Subscriber';
 import Scrollable from './Scrollable';
 
-
 const styles = StyleSheet.create({
   horizontal: {
     flexDirection: 'row',
@@ -62,13 +61,19 @@ class Grid extends Component {
 
     this.state = {
       breakpoints: props.breakpoints,
-      containerSizeClass: this.determineSize(props.breakpoints, props.horizontal, width, height),
+      containerSizeClass: this.determineSize(
+        props.breakpoints,
+        props.horizontal,
+        width,
+        height,
+      ),
       referenceSizeProvider: subscriber,
+      size: { width, height },
     };
   }
 
   getChildContext = () => ({
-    contentDirection: (this.props.horizontal ? HORIZONTAL : VERTICAL),
+    contentDirection: this.props.horizontal ? HORIZONTAL : VERTICAL,
     containerSizeClass: this.state.containerSizeClass,
     containerStretch: this.props.stretchable,
     referenceSizeProvider: this.state.referenceSizeProvider,
@@ -86,20 +91,11 @@ class Grid extends Component {
     this.updateSize(width, height);
   };
 
-
   /**
    * Helper function that calculates all state (context) values.
    */
-  determineSize = (breakpoints, horizontal, width, height) => {
-    if (width == 0 || height == 0) {
-        return undefined;
-    }
-    return determineSizeClass(
-        SIZE_NAMES,
-        breakpoints,
-        (horizontal ? height : width),
-    );
-}
+  determineSize = (breakpoints, horizontal, width, height) =>
+    determineSizeClass(SIZE_NAMES, breakpoints, horizontal ? height : width);
 
   /**
    * Handler for window size changes when grid is relative to it.
@@ -118,31 +114,35 @@ class Grid extends Component {
    * useless re-rendering.
    */
   updateSize = (width, height) => {
-    const size = this.determineSize(this.state.breakpoints, this.props.horizontal, width, height);
+    const size = this.determineSize(
+      this.state.breakpoints,
+      this.props.horizontal,
+      width,
+      height,
+    );
 
     // Propagate size change to subscribed entities.
     this.state.referenceSizeProvider.update(width, height);
 
     if (size !== this.state.containerSizeClass) {
-      this.setState({ containerSizeClass: size });
+      this.setState({ containerSizeClass: size, size: {width,height} });
     }
-  }
-
+  };
 
   render() {
     // Only enable onLayout handler when Grid is relative to its own size.
-    const onLayoutHandler = (this.props.relativeTo === 'self' ? this.onLayout : null);
- 
+    const onLayoutHandler =
+      this.props.relativeTo === 'self' ? this.onLayout : null;
+
     const view = (
       <View
         style={[
-          (this.props.horizontal ? styles.horizontal : styles.vertical),
+          this.props.horizontal ? styles.horizontal : styles.vertical,
           this.props.stretchable ? styles.stretchable : null,
           this.props.style,
         ]}
-        onLayout={onLayoutHandler}
-      >
-        {this.state.containerSizeClass ? this.props.children : null}
+        onLayout={onLayoutHandler}>
+        {this.state.containerSizeClass && this.state.size.width != 0 && this.state.size.height != 0 ? this.props.children : null}
       </View>
     );
 
@@ -153,14 +153,12 @@ class Grid extends Component {
     return (
       <Scrollable
         horizontal={this.props.horizontal}
-        stretch={this.props.stretchable}
-      >
+        stretch={this.props.stretchable}>
         {view}
       </Scrollable>
     );
   }
 }
-
 
 Grid.propTypes = {
   breakpoints: BreakpointsProp,
@@ -176,7 +174,6 @@ Grid.propTypes = {
   ]).isRequired,
 };
 
-
 Grid.defaultProps = {
   breakpoints: BREAKPOINT_VALUES,
   horizontal: false,
@@ -185,7 +182,6 @@ Grid.defaultProps = {
   style: {},
   stretchable: false,
 };
-
 
 Grid.childContextTypes = {
   /**
@@ -211,6 +207,5 @@ Grid.childContextTypes = {
     unsubscribe: PropTypes.func.isRequired,
   }),
 };
-
 
 export default Grid;
